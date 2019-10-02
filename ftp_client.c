@@ -25,7 +25,8 @@ read_ftp_server_1(char *host, char * fname, int cantBytes, int pos)
 	}
 #endif	/* DEBUG */
 
-	result_1 = leer_1((void*)&leer_1_arg, clnt);
+	result_1 = leer_1(&leer_1_arg, clnt);
+	printf("%s\n", result_1->buffer_read);
 	if (result_1 == (read_return *) NULL) {
 		clnt_perror (clnt, "call failed");
 	}
@@ -51,7 +52,7 @@ write_ftp_server_1(char *host, char * fname, int cantBytes, char * buffer)
 		exit (1);
 	}
 #endif	/* DEBUG */
-	result_2 = escribir_1((void*)&escribir_1_arg, clnt);
+	result_2 = escribir_1(&escribir_1_arg, clnt);
 	if (result_2 == (int *) NULL) {
 		clnt_perror (clnt, "call failed");
 	}
