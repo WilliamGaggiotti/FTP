@@ -5,7 +5,7 @@
  */
 
 #include "ftp.h"
-
+#include <stdio.h>
 
 void
 read_ftp_server_1(char *host, char * fname, int cantBytes, int pos)
@@ -43,7 +43,7 @@ write_ftp_server_1(char *host, char * fname, int cantBytes, char * buffer)
 	write_args escribir_1_arg;
 	escribir_1_arg.filename = fname;
 	escribir_1_arg.buffer = buffer;
-	escribir_1_arg.cantBytes = cantBytes
+	escribir_1_arg.cantBytes = cantBytes;
 #ifndef	DEBUG
 	clnt = clnt_create (host, FTP_SERVER, FTP_VERSION, "udp");
 	if (clnt == NULL) {
@@ -64,29 +64,31 @@ int
 main (int argc, char *argv[])
 {
 	char *host;
-	char method;
+	char * method;
 	char * fname;
 	int cantBytes;
 	host = argv[1];
 	method = argv[2];
 	fname = argv[3];
-	cantBytes = = argv[4];
-	if (method = 'r'){
+	cantBytes = atoi(argv[4]);
+	if (method[0] = 'r'){
 		if (argc < 6){
-			printf(stderr, "Error faltan argumentos para lectura");
+			fprintf(stderr, "Error faltan argumentos para lectura");
 		}
 		int pos;
-		pos = argv[5];
+		pos = atoi(argv[5]);
 		read_ftp_server_1(host, fname, cantBytes, pos);
-	}else{
+	}else if(method[0] = 'w'){
 		if (argc < 6){
-			printf(stderr, "Error faltan argumentos para escritura");
+			fprintf(stderr, "Error faltan argumentos para escritura");
 		}
 		char * buffer;
 		buffer = argv[5];
 		write_ftp_server_1(host, fname, cantBytes, buffer);
+	}else{
+			fprintf(stderr, "Error metodo incorrecto");
 	}
-	ftp_server_1 (host);
+
 exit (0);
 }
 
