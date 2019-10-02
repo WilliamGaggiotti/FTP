@@ -5,15 +5,23 @@
  */
 
 #include "ftp.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
 
 read_return *
 leer_1_svc(void *argp, struct svc_req *rqstp)
 {
 	static read_return  result;
-
-	/*
-	 * insert server code here
-	 */
+	char * filename = argp->filename;
+    int pos = argp->pos;
+    int cantBytes = argp->cantBytes;
+    char * path = malloc(sizeof(char)*(strlen("./file_system_servidor/") + strlen(filename));
+    strcpy(path, "./file_system_servidor/");
+    strcat(path, filename);
+    fopen(path, "r");
+    
 
 	return &result;
 }
