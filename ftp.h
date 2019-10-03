@@ -14,37 +14,41 @@ extern "C" {
 #endif
 
 
+typedef char *file;
+
+typedef char *buffer;
+
 struct read_args {
-	char *filename;
+	file filename;
 	int pos;
 	int cantBytes;
 };
 typedef struct read_args read_args;
 
 struct write_args {
-	char *filename;
+	file filename;
 	int cantBytes;
-	char *buffer;
+	buffer buffer_write;
 };
 typedef struct write_args write_args;
 
 struct read_return {
-	char *buffer_read;
+	buffer buffer_read;
 	int cant_asked;
 	int cant_read;
 };
 typedef struct read_return read_return;
 
-#define FTP_SERVER 0x20000000001
+#define FTP_SERVER 55555556
 #define FTP_VERSION 1
 
 #if defined(__STDC__) || defined(__cplusplus)
 #define leer 1
-extern  read_return * leer_1(void *, CLIENT *);
-extern  read_return * leer_1_svc(void *, struct svc_req *);
+extern  read_return * leer_1(read_args *, CLIENT *);
+extern  read_return * leer_1_svc(read_args *, struct svc_req *);
 #define escribir 2
-extern  int * escribir_1(void *, CLIENT *);
-extern  int * escribir_1_svc(void *, struct svc_req *);
+extern  int * escribir_1(write_args *, CLIENT *);
+extern  int * escribir_1_svc(write_args *, struct svc_req *);
 extern int ftp_server_1_freeresult (SVCXPRT *, xdrproc_t, caddr_t);
 
 #else /* K&R C */
@@ -60,11 +64,15 @@ extern int ftp_server_1_freeresult ();
 /* the xdr functions */
 
 #if defined(__STDC__) || defined(__cplusplus)
+extern  bool_t xdr_file (XDR *, file*);
+extern  bool_t xdr_buffer (XDR *, buffer*);
 extern  bool_t xdr_read_args (XDR *, read_args*);
 extern  bool_t xdr_write_args (XDR *, write_args*);
 extern  bool_t xdr_read_return (XDR *, read_return*);
 
 #else /* K&R C */
+extern bool_t xdr_file ();
+extern bool_t xdr_buffer ();
 extern bool_t xdr_read_args ();
 extern bool_t xdr_write_args ();
 extern bool_t xdr_read_return ();

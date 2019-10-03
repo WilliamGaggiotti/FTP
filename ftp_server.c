@@ -17,7 +17,7 @@ leer_1_svc(read_args *argp, struct svc_req *rqstp)
 	
 	static read_return result;
 	
-	char * filename = argp->filename;
+	file filename = argp->filename;
     int pos = argp->pos;
     int cantBytes = argp->cantBytes;
     //char * path = malloc(sizeof(char)*(strlen("./file_system_servidor/") + strlen(filename)));
@@ -35,7 +35,7 @@ leer_1_svc(read_args *argp, struct svc_req *rqstp)
     printf("%s\n", result.buffer_read);
     
 	return (&result);
-}
+} 
 
 int *
 escribir_1_svc(write_args *argp, struct svc_req *rqstp)

@@ -8,7 +8,7 @@
 #include <stdio.h>
 
 void
-read_ftp_server_1(char *host, char * fname, int cantBytes, int pos)
+read_ftp_server_1(char *host, file fname, int cantBytes, int pos)
 {
 	CLIENT *clnt;
 	read_return  *result_1;
@@ -23,7 +23,7 @@ read_ftp_server_1(char *host, char * fname, int cantBytes, int pos)
 		clnt_pcreateerror (host);
 		exit (1);
 	}
-#endif	/* DEBUG */
+#endif	/* DEBUG */ 
 
 	result_1 = leer_1(&leer_1_arg, clnt);
 	printf("%s\n", result_1->buffer_read);
@@ -37,13 +37,13 @@ read_ftp_server_1(char *host, char * fname, int cantBytes, int pos)
 
 
 void
-write_ftp_server_1(char *host, char * fname, int cantBytes, char * buffer)
+write_ftp_server_1(char *host, file fname, int cantBytes, buffer buffer)
 {
 	CLIENT *clnt;
 	int  *result_2;
 	write_args escribir_1_arg;
 	escribir_1_arg.filename = fname;
-	escribir_1_arg.buffer = buffer;
+	escribir_1_arg.buffer_write = buffer;
 	escribir_1_arg.cantBytes = cantBytes;
 #ifndef	DEBUG
 	clnt = clnt_create (host, FTP_SERVER, FTP_VERSION, "udp");
@@ -66,7 +66,7 @@ main (int argc, char *argv[])
 {
 	char *host;
 	char * method;
-	char * fname;
+	file fname;
 	int cantBytes;
 	host = argv[1];
 	method = argv[2];
@@ -83,9 +83,9 @@ main (int argc, char *argv[])
 		if (argc < 6){
 			fprintf(stderr, "Error faltan argumentos para escritura");
 		}
-		char * buffer;
-		buffer = argv[5];
-		write_ftp_server_1(host, fname, cantBytes, buffer);
+		buffer buf;
+		buf = argv[5];
+		write_ftp_server_1(host, fname, cantBytes, buf);
 	}else{
 			fprintf(stderr, "Error metodo incorrecto");
 	}

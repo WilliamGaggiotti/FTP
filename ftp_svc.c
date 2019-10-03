@@ -20,7 +20,8 @@ static void
 ftp_server_1(struct svc_req *rqstp, register SVCXPRT *transp)
 {
 	union {
-		int fill;
+		read_args leer_1_arg;
+		write_args escribir_1_arg;
 	} argument;
 	char *result;
 	xdrproc_t _xdr_argument, _xdr_result;
@@ -32,13 +33,13 @@ ftp_server_1(struct svc_req *rqstp, register SVCXPRT *transp)
 		return;
 
 	case leer:
-		_xdr_argument = (xdrproc_t) xdr_void;
+		_xdr_argument = (xdrproc_t) xdr_read_args;
 		_xdr_result = (xdrproc_t) xdr_read_return;
 		local = (char *(*)(char *, struct svc_req *)) leer_1_svc;
 		break;
 
 	case escribir:
-		_xdr_argument = (xdrproc_t) xdr_void;
+		_xdr_argument = (xdrproc_t) xdr_write_args;
 		_xdr_result = (xdrproc_t) xdr_int;
 		local = (char *(*)(char *, struct svc_req *)) escribir_1_svc;
 		break;
@@ -63,13 +64,13 @@ ftp_server_1(struct svc_req *rqstp, register SVCXPRT *transp)
 	return;
 }
 
-int
+int 
 main (int argc, char **argv)
 {
 	register SVCXPRT *transp;
 
 	pmap_unset (FTP_SERVER, FTP_VERSION);
-
+	printf("usando UDP");
 	transp = svcudp_create(RPC_ANYSOCK);
 	if (transp == NULL) {
 		fprintf (stderr, "%s", "cannot create udp service.");

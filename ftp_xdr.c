@@ -6,11 +6,31 @@
 #include "ftp.h"
 
 bool_t
+xdr_file (XDR *xdrs, file *objp)
+{
+	register int32_t *buf;
+
+	 if (!xdr_string (xdrs, objp, 100))
+		 return FALSE;
+	return TRUE;
+}
+
+bool_t
+xdr_buffer (XDR *xdrs, buffer *objp)
+{
+	register int32_t *buf;
+
+	 if (!xdr_string (xdrs, objp, 100))
+		 return FALSE;
+	return TRUE;
+}
+
+bool_t
 xdr_read_args (XDR *xdrs, read_args *objp)
 {
 	register int32_t *buf;
 
-	 if (!xdr_pointer (xdrs, (char **)&objp->filename, sizeof (char), (xdrproc_t) xdr_char))
+	 if (!xdr_file (xdrs, &objp->filename))
 		 return FALSE;
 	 if (!xdr_int (xdrs, &objp->pos))
 		 return FALSE;
@@ -24,11 +44,11 @@ xdr_write_args (XDR *xdrs, write_args *objp)
 {
 	register int32_t *buf;
 
-	 if (!xdr_pointer (xdrs, (char **)&objp->filename, sizeof (char), (xdrproc_t) xdr_char))
+	 if (!xdr_file (xdrs, &objp->filename))
 		 return FALSE;
 	 if (!xdr_int (xdrs, &objp->cantBytes))
 		 return FALSE;
-	 if (!xdr_pointer (xdrs, (char **)&objp->buffer, sizeof (char), (xdrproc_t) xdr_char))
+	 if (!xdr_buffer (xdrs, &objp->buffer_write))
 		 return FALSE;
 	return TRUE;
 }
@@ -38,7 +58,7 @@ xdr_read_return (XDR *xdrs, read_return *objp)
 {
 	register int32_t *buf;
 
-	 if (!xdr_pointer (xdrs, (char **)&objp->buffer_read, sizeof (char), (xdrproc_t) xdr_char))
+	 if (!xdr_buffer (xdrs, &objp->buffer_read))
 		 return FALSE;
 	 if (!xdr_int (xdrs, &objp->cant_asked))
 		 return FALSE;
