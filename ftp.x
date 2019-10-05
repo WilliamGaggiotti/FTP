@@ -1,26 +1,26 @@
-typedef string file<100>;
-typedef string buffer<100>;
-struct read_args{
-    file filename;
-    int pos;
-    int cantBytes;
+
+#define VERSION_NUMBER 1
+
+%#define DATA_SIZE UINT_MAX
+
+struct ftp_file {
+    string name<512>;
+	opaque data<>;
+	uint64_t checksum;
 };
 
-struct write_args{
-    file filename;
-    int cantBytes;
-    buffer buffer_write;
+
+struct ftp_req {
+    string name<512>;
+    uint64_t pos;
+    uint64_t bytes;
 };
 
-struct read_return{
-    buffer buffer_read;
-    int cant_asked;
-    int cant_read;
-};
+program FTP_PROG {
+    version FTP_VERSION {
+        ftp_file READ(ftp_req) = 1;
+        int WRITE(ftp_file) = 2;
+    } = VERSION_NUMBER;
+} = 555555555;
 
-program FTP_SERVER {
-    version FTP_VERSION{
-        read_return leer(read_args) = 1;
-        int escribir(write_args) = 2;
-    } = 1;
-} = 55555556;
+#define FTP_PROG 555555555

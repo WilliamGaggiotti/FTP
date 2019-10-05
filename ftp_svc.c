@@ -15,13 +15,14 @@
 #ifndef SIG_PF
 #define SIG_PF void(*)(int)
 #endif
+#define DATA_SIZE UINT_MAX
 
 static void
-ftp_server_1(struct svc_req *rqstp, register SVCXPRT *transp)
+ftp_prog_1(struct svc_req *rqstp, register SVCXPRT *transp)
 {
 	union {
-		read_args leer_1_arg;
-		write_args escribir_1_arg;
+		ftp_req read_1_arg;
+		ftp_file write_1_arg;
 	} argument;
 	char *result;
 	xdrproc_t _xdr_argument, _xdr_result;
@@ -32,16 +33,16 @@ ftp_server_1(struct svc_req *rqstp, register SVCXPRT *transp)
 		(void) svc_sendreply (transp, (xdrproc_t) xdr_void, (char *)NULL);
 		return;
 
-	case leer:
-		_xdr_argument = (xdrproc_t) xdr_read_args;
-		_xdr_result = (xdrproc_t) xdr_read_return;
-		local = (char *(*)(char *, struct svc_req *)) leer_1_svc;
+	case READ:
+		_xdr_argument = (xdrproc_t) xdr_ftp_req;
+		_xdr_result = (xdrproc_t) xdr_ftp_file;
+		local = (char *(*)(char *, struct svc_req *)) read_1_svc;
 		break;
 
-	case escribir:
-		_xdr_argument = (xdrproc_t) xdr_write_args;
+	case WRITE:
+		_xdr_argument = (xdrproc_t) xdr_ftp_file;
 		_xdr_result = (xdrproc_t) xdr_int;
-		local = (char *(*)(char *, struct svc_req *)) escribir_1_svc;
+		local = (char *(*)(char *, struct svc_req *)) write_1_svc;
 		break;
 
 	default:
@@ -64,20 +65,20 @@ ftp_server_1(struct svc_req *rqstp, register SVCXPRT *transp)
 	return;
 }
 
-int 
+int
 main (int argc, char **argv)
 {
 	register SVCXPRT *transp;
 
-	pmap_unset (FTP_SERVER, FTP_VERSION);
-	printf("usando UDP");
+	pmap_unset (FTP_PROG, FTP_VERSION);
+
 	transp = svcudp_create(RPC_ANYSOCK);
 	if (transp == NULL) {
 		fprintf (stderr, "%s", "cannot create udp service.");
 		exit(1);
 	}
-	if (!svc_register(transp, FTP_SERVER, FTP_VERSION, ftp_server_1, IPPROTO_UDP)) {
-		fprintf (stderr, "%s", "unable to register (FTP_SERVER, FTP_VERSION, udp).");
+	if (!svc_register(transp, FTP_PROG, FTP_VERSION, ftp_prog_1, IPPROTO_UDP)) {
+		fprintf (stderr, "%s", "unable to register (FTP_PROG, FTP_VERSION, udp).");
 		exit(1);
 	}
 
@@ -86,8 +87,8 @@ main (int argc, char **argv)
 		fprintf (stderr, "%s", "cannot create tcp service.");
 		exit(1);
 	}
-	if (!svc_register(transp, FTP_SERVER, FTP_VERSION, ftp_server_1, IPPROTO_TCP)) {
-		fprintf (stderr, "%s", "unable to register (FTP_SERVER, FTP_VERSION, tcp).");
+	if (!svc_register(transp, FTP_PROG, FTP_VERSION, ftp_prog_1, IPPROTO_TCP)) {
+		fprintf (stderr, "%s", "unable to register (FTP_PROG, FTP_VERSION, tcp).");
 		exit(1);
 	}
 

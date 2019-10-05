@@ -13,69 +13,56 @@
 extern "C" {
 #endif
 
+#define DATA_SIZE UINT_MAX
 
-typedef char *file;
-
-typedef char *buffer;
-
-struct read_args {
-	file filename;
-	int pos;
-	int cantBytes;
+struct ftp_file {
+	char *name;
+	struct {
+		u_int data_len;
+		char *data_val;
+	} data;
+	uint64_t checksum;
 };
-typedef struct read_args read_args;
+typedef struct ftp_file ftp_file;
 
-struct write_args {
-	file filename;
-	int cantBytes;
-	buffer buffer_write;
+struct ftp_req {
+	char *name;
+	uint64_t pos;
+	uint64_t bytes;
 };
-typedef struct write_args write_args;
+typedef struct ftp_req ftp_req;
 
-struct read_return {
-	buffer buffer_read;
-	int cant_asked;
-	int cant_read;
-};
-typedef struct read_return read_return;
-
-#define FTP_SERVER 55555556
+#define FTP_PROG 555555555
 #define FTP_VERSION 1
 
 #if defined(__STDC__) || defined(__cplusplus)
-#define leer 1
-extern  read_return * leer_1(read_args *, CLIENT *);
-extern  read_return * leer_1_svc(read_args *, struct svc_req *);
-#define escribir 2
-extern  int * escribir_1(write_args *, CLIENT *);
-extern  int * escribir_1_svc(write_args *, struct svc_req *);
-extern int ftp_server_1_freeresult (SVCXPRT *, xdrproc_t, caddr_t);
+#define READ 1
+extern  ftp_file * read_1(ftp_req , CLIENT *);
+extern  ftp_file * read_1_svc(ftp_req , struct svc_req *);
+#define WRITE 2
+extern  int * write_1(ftp_file *, CLIENT *);
+extern  int * write_1_svc(ftp_file *, struct svc_req *);
+extern int ftp_prog_1_freeresult (SVCXPRT *, xdrproc_t, caddr_t);
 
 #else /* K&R C */
-#define leer 1
-extern  read_return * leer_1();
-extern  read_return * leer_1_svc();
-#define escribir 2
-extern  int * escribir_1();
-extern  int * escribir_1_svc();
-extern int ftp_server_1_freeresult ();
+#define READ 1
+extern  ftp_file * read_1();
+extern  ftp_file * read_1_svc();
+#define WRITE 2
+extern  int * write_1();
+extern  int * write_1_svc();
+extern int ftp_prog_1_freeresult ();
 #endif /* K&R C */
 
 /* the xdr functions */
 
 #if defined(__STDC__) || defined(__cplusplus)
-extern  bool_t xdr_file (XDR *, file*);
-extern  bool_t xdr_buffer (XDR *, buffer*);
-extern  bool_t xdr_read_args (XDR *, read_args*);
-extern  bool_t xdr_write_args (XDR *, write_args*);
-extern  bool_t xdr_read_return (XDR *, read_return*);
+extern  bool_t xdr_ftp_file (XDR *, ftp_file*);
+extern  bool_t xdr_ftp_req (XDR *, ftp_req*);
 
 #else /* K&R C */
-extern bool_t xdr_file ();
-extern bool_t xdr_buffer ();
-extern bool_t xdr_read_args ();
-extern bool_t xdr_write_args ();
-extern bool_t xdr_read_return ();
+extern bool_t xdr_ftp_file ();
+extern bool_t xdr_ftp_req ();
 
 #endif /* K&R C */
 
