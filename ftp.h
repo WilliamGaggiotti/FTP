@@ -37,8 +37,8 @@ typedef struct ftp_req ftp_req;
 
 #if defined(__STDC__) || defined(__cplusplus)
 #define READ 1
-extern  ftp_file * read_1(ftp_req , CLIENT *);
-extern  ftp_file * read_1_svc(ftp_req , struct svc_req *);
+extern  ftp_file * read_1(ftp_req *, CLIENT *);
+extern  ftp_file * read_1_svc(ftp_req *, struct svc_req *);
 #define WRITE 2
 extern  int * write_1(ftp_file *, CLIENT *);
 extern  int * write_1_svc(ftp_file *, struct svc_req *);
