@@ -13,7 +13,6 @@
 extern "C" {
 #endif
 
-#define DATA_SIZE UINT_MAX
 
 struct ftp_file {
 	char *name;
@@ -21,37 +20,37 @@ struct ftp_file {
 		u_int data_len;
 		char *data_val;
 	} data;
-	uint64_t checksum;
+	uint64_t pos;
 };
 typedef struct ftp_file ftp_file;
 
 struct ftp_req {
 	char *name;
 	uint64_t pos;
-	uint64_t bytes;
+	uint64_t length;
 };
 typedef struct ftp_req ftp_req;
 
-#define FTP_PROG 555555555
-#define FTP_VERSION 1
+#define FTP_SERVER 0x20000001
+#define VERSION 1
 
 #if defined(__STDC__) || defined(__cplusplus)
-#define READ 1
-extern  ftp_file * read_1(ftp_req *, CLIENT *);
-extern  ftp_file * read_1_svc(ftp_req *, struct svc_req *);
-#define WRITE 2
-extern  int * write_1(ftp_file *, CLIENT *);
-extern  int * write_1_svc(ftp_file *, struct svc_req *);
-extern int ftp_prog_1_freeresult (SVCXPRT *, xdrproc_t, caddr_t);
+#define read_file 1
+extern  ftp_file * read_file_1(ftp_req *, CLIENT *);
+extern  ftp_file * read_file_1_svc(ftp_req *, struct svc_req *);
+#define write_file 2
+extern  int * write_file_1(ftp_file *, CLIENT *);
+extern  int * write_file_1_svc(ftp_file *, struct svc_req *);
+extern int ftp_server_1_freeresult (SVCXPRT *, xdrproc_t, caddr_t);
 
 #else /* K&R C */
-#define READ 1
-extern  ftp_file * read_1();
-extern  ftp_file * read_1_svc();
-#define WRITE 2
-extern  int * write_1();
-extern  int * write_1_svc();
-extern int ftp_prog_1_freeresult ();
+#define read_file 1
+extern  ftp_file * read_file_1();
+extern  ftp_file * read_file_1_svc();
+#define write_file 2
+extern  int * write_file_1();
+extern  int * write_file_1_svc();
+extern int ftp_server_1_freeresult ();
 #endif /* K&R C */
 
 /* the xdr functions */

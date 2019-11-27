@@ -5,74 +5,33 @@
  */
 
 #include "ftp.h"
-#define DATA_SIZE UINT_MAX
 
 ftp_file *
-read_1_svc(ftp_req *argp, struct svc_req *rqstp)
+read_file_1_svc(ftp_req *argp, struct svc_req *rqstp)
 {
-	static ftp_file  result;
+	static ftp_file result;
+  result.name = malloc(sizeof(char)*512);
+	int packageSize = (argp->length > 512)? 512 : argp->length;
+  result.data.data_val = malloc(sizeof(char)*packageSize);
+  strncpy(result.name, argp->name, 512);
 
-	char * filename = argp->name;
-	int pos = argp->pos;
-	u_int cant_bytes = argp->bytes;
-	char path[512];
-	strcpy(path, "./server_filesystem/");
-	strcat(path, filename);
-	result.name = malloc(sizeof(char) * strlen(filename));
-	strcpy(result.name, filename);
-	result.data.data_val = malloc(sizeof(char) * cant_bytes + 1);
-	printf("Cantidad de bytes pedidos: %d\n\n\n", cant_bytes);
-	FILE * fd = fopen(path, "rb");
-	if(fd == NULL){
-		result.data.data_val = malloc(20);
-		strcpy(result.data.data_val, "No existe el archivo");
-		result.data.data_len = 0;
-		result.checksum = cant_bytes;
-		return &result;
-	}
-	if(cant_bytes ==0){
-		printf("Se pidio todo el archivo\n");
-		fseek(fd, 0L, SEEK_END);
-		cant_bytes = ftell(fd);
-		result.data.data_len = ftell(fd);
-		printf("el tamanio total es %d\n", cant_bytes);
-		result.checksum = cant_bytes;
-		result.data.data_val = malloc(20);
-		//strcpy(result.data.data_val, "Enviando tamanio de archivo");
-		pos = 0;
-		fclose(fd);
-		return &result;
-	}
-	
-	fseek(fd, pos, SEEK_SET);
-	result.data.data_len = fread(result.data.data_val, sizeof(char), cant_bytes, fd);
-	printf("Lectura exitosa\n");
-	result.checksum = cant_bytes;
-	printf("cant leidos %d\n",result.data.data_len);
-	printf("tamanio enviado %lu\n", strlen(result.data.data_val));
-	printf("dato enviado %s\n", result.data.data_val);
-	fclose(fd);
-	
+  FILE* f = fopen(argp->name, "rb");
+  fseek(f, argp->pos, SEEK_SET);
+  result.data.data_len = fread(result.data.data_val, 1, packageSize, f);
+  fclose(f);
+
 	return &result;
-
 }
 
 int *
-write_1_svc(ftp_file *argp, struct svc_req *rqstp)
+write_file_1_svc(ftp_file *argp, struct svc_req *rqstp)
 {
 	static int  result;
-	printf("cantBytes %d\n", argp->data.data_len);
-	printf("%s\n", argp->data.data_val);
-	char * patz = malloc(512);
-	strcpy(patz, "./server_filesystem/");
-	strcat(patz, argp->name);
-	int bytes = argp->data.data_len;
-	FILE *fd = fopen(patz,"ab+");
-	if(argp->data.data_len == 0){
-		fseek(fd, 0L, SEEK_END);
-		bytes = ftell(fd);
-	}
-	result = fwrite(argp->data.data_val,sizeof(char),bytes,fd);
-	fclose(fd);
+
+  FILE* f = fopen(argp->name, "ab");
+  fseek(f, argp->pos, SEEK_SET);
+  result = fwrite(argp->data.data_val, 1, argp->data.data_len, f);
+  fclose(f);
+
 	return &result;
 }

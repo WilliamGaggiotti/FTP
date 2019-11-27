@@ -5,18 +5,17 @@
 
 #include <memory.h> /* for memset */
 #include "ftp.h"
-#define DATA_SIZE UINT_MAX
 
 /* Default timeout can be changed using clnt_control() */
 static struct timeval TIMEOUT = { 25, 0 };
 
 ftp_file *
-read_1(ftp_req *argp, CLIENT *clnt)
+read_file_1(ftp_req *argp, CLIENT *clnt)
 {
 	static ftp_file clnt_res;
 
 	memset((char *)&clnt_res, 0, sizeof(clnt_res));
-	if (clnt_call (clnt, READ,
+	if (clnt_call (clnt, read_file,
 		(xdrproc_t) xdr_ftp_req, (caddr_t) argp,
 		(xdrproc_t) xdr_ftp_file, (caddr_t) &clnt_res,
 		TIMEOUT) != RPC_SUCCESS) {
@@ -26,12 +25,12 @@ read_1(ftp_req *argp, CLIENT *clnt)
 }
 
 int *
-write_1(ftp_file *argp, CLIENT *clnt)
+write_file_1(ftp_file *argp, CLIENT *clnt)
 {
 	static int clnt_res;
 
 	memset((char *)&clnt_res, 0, sizeof(clnt_res));
-	if (clnt_call (clnt, WRITE,
+	if (clnt_call (clnt, write_file,
 		(xdrproc_t) xdr_ftp_file, (caddr_t) argp,
 		(xdrproc_t) xdr_int, (caddr_t) &clnt_res,
 		TIMEOUT) != RPC_SUCCESS) {

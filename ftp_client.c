@@ -5,140 +5,114 @@
  */
 
 #include "ftp.h"
-#include <stdio.h>
-#define DATA_SIZE UINT_MAX
-#define PKG_SIZE 1024
-
-
-
-
 
 
 void
-read_ftp_server_1(char *host, char * fname, int requestedBytes, int pos)
+ftp_server_1(char *host, char *src_name, int pos, int cantBytes)
 {
-	
 	CLIENT *clnt;
-	ftp_file  *result_1;
-	ftp_req  read_1_arg;
-	int cantRead = 0;
-	
+	ftp_file  *src_file;
+	ftp_req  request;
 
-#ifndef	DEBUG
-	clnt = clnt_create (host, FTP_PROG, FTP_VERSION, "udp");
+	clnt = clnt_create (host, FTP_SERVER, VERSION, "udp");
 	if (clnt == NULL) {
 		clnt_pcreateerror (host);
 		exit (1);
 	}
-#endif	/* DEBcant_leidoscant_leidosUG */
-	read_1_arg.name = fname;
-	read_1_arg.pos = pos;
-	u_int cantBytes;
-	if (requestedBytes == 0){
-		read_1_arg.bytes = requestedBytes;
-		result_1 = read_1(&read_1_arg, clnt);
-		cantBytes = result_1->data.data_len;
-	}else{
-		cantBytes = requestedBytes;
+
+  	request.name = src_name;
+  	request.pos = pos;
+	request.length = (cantBytes == 0) ? 512 : cantBytes;
+
+	src_file = read_file_1(&request, clnt);
+	if (src_file == (ftp_file *) NULL) 
+		clnt_perror (clnt, "call failed");
+
+  	FILE* f = fopen("dest_name", "wb");
+  	printf("\n Writing to %s", "dest_name");
+  	printf("\n datalen es %d", src_file->data.data_len);
+	
+	if (cantBytes == 0){
+		request.pos = 0; //Si se pide todo el archivo,
+		while(src_file->data.data_len){
+			fseek(f, request.pos, SEEK_SET);
+			request.pos += fwrite(src_file->data.data_val, 1, src_file->data.data_len, f);
+			src_file = read_file_1(&request, clnt);
+			if (src_file == (ftp_file *) NULL) 
+				clnt_perror (clnt, "call failed");
+  		}
 	}
-	char * patz = malloc(512);
-	strcpy(patz, "./client_filesystem/");
-	strcat(patz, fname);
-	FILE * fd = fopen(patz,"ab+");
-	printf("Haciendo llamado RPC para lectura\n");
-	while(cantBytes - cantRead > 0 ){
-		if (cantBytes - cantRead < PKG_SIZE){
-			printf("<===== Ultima lectura. Se leeran %d bytes ====>\n", (cantBytes - cantRead));
-			read_1_arg.bytes = cantBytes - cantRead;			
-		}else{
-			printf("<===== Leyendo ====>\n" );
-			read_1_arg.bytes = PKG_SIZE;
+	else{
+		fseek(f, 0, SEEK_SET);
+		request.pos += fwrite(src_file->data.data_val, 1, src_file->data.data_len, f);
+		int bytesRead = src_file->data.data_len;
+		if (bytesRead < cantBytes){
+			while(src_file->data.data_len){    
+				src_file = read_file_1(&request, clnt);
+				if (src_file == (ftp_file *) NULL) 
+					clnt_perror (clnt, "call failed");
+					printf("\n datalen es %d", src_file->data.data_len);
+				fseek(f, bytesRead, SEEK_SET);
+				request.pos += fwrite(src_file->data.data_val, 1, src_file->data.data_len, f);
+				bytesRead += src_file->data.data_len;
+			}
 		}
-		result_1 = read_1(&read_1_arg, clnt);
-		cantRead += result_1->data.data_len;
-		read_1_arg.pos += result_1->data.data_len;
-		fwrite(result_1->data.data_val,1,cantRead,fd);
 	}
-	
-	if (result_1 == (ftp_file *) NULL) {
-		clnt_perror (clnt, "call failed");
-	}
-	
-	
-	fclose(fd);
+  	
+  fclose(f);
+  printf("\n %lu bytes written.", request.pos);
 
-
-#ifndef	DEBUG
-	clnt_destroy (clnt);
-#endif	 /* DEBUG */
+  clnt_destroy (clnt);
 }
 
 void
-write_ftp_server_1(char *host, char * fname, int cantBytes, char * buffer)
+ftp_server_2(char *host, char *src_name, char *dest_name)
 {
-	printf("Comenzando llamado RPC para escritura\n");
-	
 	CLIENT *clnt;
-	int  *result_2;
-	ftp_file  write_1_arg;
+	ftp_file  src_file;
+	int*  write_result;
 
-	clnt = clnt_create (host, FTP_PROG, FTP_VERSION, "tcp");
+	clnt = clnt_create (host, FTP_SERVER, VERSION, "udp");
 	if (clnt == NULL) {
 		clnt_pcreateerror (host);
 		exit (1);
 	}
-	write_1_arg.name = fname;
-	write_1_arg.data.data_val = buffer;
-	write_1_arg.data.data_len = cantBytes;
-	printf("Haciendo llamado RPC para escritura\n");
-	result_2 = write_1(&write_1_arg, clnt);
-	if (result_2 == (int *) NULL) {
-		clnt_perror (clnt, "call failed");
-	}printf("Creando archivo \n");
 
-	clnt_destroy (clnt);
+  src_file.name = dest_name;
+  src_file.pos = 0;
+  src_file.data.data_val = malloc(sizeof(char)*512);
+  FILE* f = fopen(src_name, "rb");
+  printf("\n Reading file %s", src_name);
+  while(src_file.data.data_len = fread(src_file.data.data_val, 1, 512, f)){
+	  write_result = write_file_1(&src_file, clnt);
+	  if (write_result == (int *) NULL) 
+		  clnt_perror (clnt, "call failed");
+    src_file.pos += src_file.data.data_len;
+    fseek(f, src_file.pos, SEEK_SET);
+  }
+
+  fclose(f);
+  printf("\n %lu bytes sent.", src_file.pos);
+
+  clnt_destroy (clnt);
 }
-
-
-
-
-
-
-
 
 int
 main (int argc, char *argv[])
 {
 	char *host;
-	char * method;
-	char * fname;
-	int cantBytes;
-	host = argv[1];
-	method = argv[2];
-	fname = argv[3];
-	cantBytes = atoi(argv[4]);
-	if (method[0] == 'r'){
-		if (argc < 6){
-			fprintf(stderr, "Error faltan argumentos para lectura\n");
-		}
-		int pos;
-		pos = atoi(argv[5]);
-		printf("Enviando pedido de lectura\n");
-		read_ftp_server_1(host, fname, cantBytes, pos);
 
-	}else if(method[0] == 'w'){
-		
-		if (argc < 6){
-			fprintf(stderr, "Error faltan argumentos para escritura\n");
-		}
-		printf("Enviando pedido de escritura\n");
-		char * buffer;
-		buffer = argv[5];
-		write_ftp_server_1(host, fname, cantBytes, buffer);
-
-	}else{
-			fprintf(stderr, "Error metodo incorrecto");
+	if (argc < 5) {
+		printf ("usage: %s server_host\n", argv[0]);
+		exit (1);
 	}
-
-exit (0);
+	host = argv[1];
+  if(strcmp(argv[2], "read") == 0)
+	  ftp_server_1 (host, argv[3], atoi(argv[4]), atoi(argv[5]));
+  else if(strcmp(argv[2], "write") == 0)
+    ftp_server_2 (host, argv[3], argv[4]);
+  else
+    printf("\n Unknown command.");
+  printf("\n");
+  exit (0);
 }

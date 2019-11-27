@@ -1,26 +1,20 @@
-
-#define VERSION_NUMBER 1
-
-%#define DATA_SIZE UINT_MAX
+#define MAX_PACKET_SIZE 512
 
 struct ftp_file {
-    string name<512>;
-	opaque data<>;
-	uint64_t checksum;
+  string name<MAX_PACKET_SIZE>;
+  opaque data<MAX_PACKET_SIZE>;
+  uint64_t pos;
 };
-
 
 struct ftp_req {
-    string name<512>;
-    uint64_t pos;
-    uint64_t bytes;
+  string name<MAX_PACKET_SIZE>;
+  uint64_t pos;
+	uint64_t length;
 };
 
-program FTP_PROG {
-    version FTP_VERSION {
-        ftp_file READ(ftp_req) = 1;
-        int WRITE(ftp_file) = 2;
-    } = VERSION_NUMBER;
-} = 555555555;
-
-#define FTP_PROG 555555555
+program FTP_SERVER {
+  version VERSION {
+    ftp_file read_file(ftp_req) = 1;
+    int write_file(ftp_file) = 2;
+  } = 1;
+} = 0x20000001;

@@ -4,7 +4,6 @@
  */
 
 #include "ftp.h"
-#define DATA_SIZE UINT_MAX
 
 bool_t
 xdr_ftp_file (XDR *xdrs, ftp_file *objp)
@@ -13,9 +12,9 @@ xdr_ftp_file (XDR *xdrs, ftp_file *objp)
 
 	 if (!xdr_string (xdrs, &objp->name, 512))
 		 return FALSE;
-	 if (!xdr_bytes (xdrs, (char **)&objp->data.data_val, (u_int *) &objp->data.data_len, ~0))
+	 if (!xdr_bytes (xdrs, (char **)&objp->data.data_val, (u_int *) &objp->data.data_len, 512))
 		 return FALSE;
-	 if (!xdr_uint64_t (xdrs, &objp->checksum))
+	 if (!xdr_uint64_t (xdrs, &objp->pos))
 		 return FALSE;
 	return TRUE;
 }
@@ -29,7 +28,7 @@ xdr_ftp_req (XDR *xdrs, ftp_req *objp)
 		 return FALSE;
 	 if (!xdr_uint64_t (xdrs, &objp->pos))
 		 return FALSE;
-	 if (!xdr_uint64_t (xdrs, &objp->bytes))
+	 if (!xdr_uint64_t (xdrs, &objp->length))
 		 return FALSE;
 	return TRUE;
 }
